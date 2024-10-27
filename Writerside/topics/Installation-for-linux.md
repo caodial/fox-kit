@@ -10,3 +10,4 @@
 First run this command
 
 ``` git clone http://localhost:3000/caodial/Foxkit.git ```
+This should pull 1 file install.sh
