@@ -1,1 +1,1 @@
-echo --Foxkit installer
+echo ---Foxkit installer---
