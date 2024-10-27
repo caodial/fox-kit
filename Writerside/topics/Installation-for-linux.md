@@ -9,4 +9,4 @@
 
 First run this command
 
-```  git clone github.com/caodial/foxkit ```
+``` http://localhost:3000/caodial/foxkit-api.git ```
