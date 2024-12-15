@@ -3,6 +3,7 @@
 ## What you will need:
  1. A copy of git
 2. at least 5 GB of storage
+3. Mysql
 > This beta only works for apt-get systems
 > 
 {style="warning"}
