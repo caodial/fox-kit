@@ -9,3 +9,8 @@
 {style="warning"}
 
 First go to Turn Windows features on or off and check wsl
+> Your computer may restart
+>
+{style="warning"}
+
+Then
