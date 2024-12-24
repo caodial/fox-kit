@@ -6,7 +6,7 @@ sudo apt-get update
 # Install MySQL server
 sudo apt-get install -y mysql-server
 
-# Start MySQL service
+# Start MySQL services
 sudo systemctl start mysql
 
 # Enable MySQL to start on boot
