@@ -1,5 +1,5 @@
 #!/bin/bash
-echo ---Foxkit Beta--
+echo ---Foxkit Beta---
 
 # Function to create a new user and store in users.sql
 create_user() {
