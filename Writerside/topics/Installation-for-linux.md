@@ -3,13 +3,16 @@
 ## What you will need:
  1. A copy of git
 2. at least 5 GB of storage
-3. Mysql
 > This beta only works for apt-get systems
 > 
 {style="warning"}
-
+> You need mysql but foxkit will automaticly install it for you
+> 
 First run this command
 
-``` git clone http://localhost:3000/caodial/Foxkit.git ```
+``` sudo apt-get update && sudo-apt get upgrade ```
 
-This should pull 1 file install.sh
+After run this command
+``` git pull http://localhost:3000/caodial/foxkit-install ```
+
+
