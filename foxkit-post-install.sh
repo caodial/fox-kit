@@ -5,7 +5,8 @@ sudo apt-get update && sudo apt-get upgrade -y
 
 # Install MySQL server
 sudo apt-get install -y mysql-server
-sudo apt-get install nano -y
+sudo apt-get install -y nano
+
 # Start MySQL services
 sudo systemctl start mysql
 
