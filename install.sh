@@ -13,4 +13,4 @@ elif [ "$answer" == "no" ]; then
 else
     echo "Invalid answer. Please respond with 'y' or 'n'."
 ./foxkit-post-install.sh
-fi
+f
