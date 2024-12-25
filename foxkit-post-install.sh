@@ -20,4 +20,6 @@ echo "MySQL installation and setup complete."
 echo "Please run the following command to log into MySQL:"
 echo "mysql -u root -p"
 # Wait for user to press any key to exit
+# Open foxkit.sh
+./foxkit.sh
 read -n 1 -s -r -p "Press any key to exit"
