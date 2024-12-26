@@ -45,7 +45,12 @@ create_file() {
 edit_file() {
     read -p "Enter the filename: " filename
     if [ -f "$filename" ]; then
-        nano "$filename"
+        if command -v nano &> /dev/null; then
+            nano "$filename"
+        else
+            echo "nano is not installed. Using vi instead."
+            vi "$filename"
+        fi
     else
         echo "File '$filename' does not exist."
     fi
