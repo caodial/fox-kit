@@ -47,9 +47,12 @@ edit_file() {
     if [ -f "$filename" ]; then
         if command -v nano &> /dev/null; then
             nano "$filename"
-        else
-            echo "nano is not installed. Using vi instead."
+        elif command -v vi &> /dev/null; then
             vi "$filename"
+        elif command -v emacs &> /dev/null; then
+            emacs "$filename"
+        else
+            echo "No suitable text editor found. Please install nano, vi, or emacs."
         fi
     else
         echo "File '$filename' does not exist."
