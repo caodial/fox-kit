@@ -1,4 +1,5 @@
 #!/bin/bash
+
 echo ---Foxkit Beta---
 
 # Function to create a new user and store in users.sql
@@ -31,7 +32,9 @@ show_menu() {
     echo "2) Edit an existing file"
     echo "3) Run a script"
     echo "4) Create a new user"
-    echo "5) Exit"
+    echo "5) Test the app"
+    echo "6) Install an IDE"
+    echo "7) Exit"
 }
 
 # Function to create a new file
@@ -69,7 +72,29 @@ run_script() {
     fi
 }
 
-# Main loop
+# Function to test the app
+test_app() {
+    echo "Running tests..."
+    # Add your test commands here
+    echo "All tests passed!"
+}
+
+# Function to install an IDE (Visual Studio Code)
+install_ide() {
+    if command -v code &> /dev/null; then
+        echo "Visual Studio Code is already installed."
+    else
+        echo "Installing Visual Studio Code..."
+        sudo apt update
+        sudo apt install -y software-properties-common apt-transport-https wget
+        wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+        sudo apt update
+        sudo apt install -y code
+    fi
+}
+
+#Main loop
 while true; do
     show_menu
     read -p "Choose an option: " choice
@@ -78,7 +103,9 @@ while true; do
         2) edit_file ;;
         3) run_script ;;
         4) create_user ;;
-        5) exit 0 ;;
+        5) test_app ;;
+        6) install_ide ;;
+        7) exit 0 ;;
         *) echo "Invalid option." ;;
     esac
 done

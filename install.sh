@@ -60,4 +60,4 @@ else
     exit 1
 fi
 
-./foxkit-post-install.sh
+./foxkit-post-install.sh "$pkg_manager"
