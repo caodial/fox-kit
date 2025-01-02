@@ -47,10 +47,10 @@ esac
 
 # Update package information
 $update_cmd
-
-# Install MySQL server and nano
+read -p " What text editor do you want to use?" text_editor
+# Install MySQL server and the text editor of your choice
 $install_cmd mysql-server
-$install_cmd nano
+$install_cmd $text_editor
 
 # Start MySQL services
 sudo systemctl start mysql

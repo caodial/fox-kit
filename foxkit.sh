@@ -34,7 +34,8 @@ show_menu() {
     echo "4) Create a new user"
     echo "5) Test the app"
     echo "6) Install an IDE"
-    echo "7) Exit"
+    echo "7) Publish the app"
+    echo "8) Exit"
 }
 
 # Function to create a new file
@@ -72,12 +73,28 @@ run_script() {
     fi
 }
 
+
 # Function to test the app
 test_app() {
-    echo "Running tests..."
-    # Add your test commands here
-    echo "All tests passed!"
+    read -p "Enter the script filename to test: " filename
+    if [ -f "$filename" ]; then
+        # Run the script and capture any errors
+        errors=$(bash "$filename" 2>&1)
+        if [ $? -eq 0 ]; then
+            echo "All tests passed!"
+        else
+            echo "Errors found:"
+            echo "$errors"
+            echo "For more information on resolving errors, you can visit the following links:"
+            echo "1. Bash Scripting Errors: https://www.shellscript.sh/errors.html"
+            echo "2. Common Bash Errors: https://tldp.org/LDP/abs/html/exitcodes.html"
+            echo "3. Stack Overflow: https://stackoverflow.com/questions/tagged/bash"
+        fi
+    else
+        echo "Script '$filename' does not exist."
+    fi
 }
+
 
 # Function to install an IDE (Visual Studio Code)
 install_ide() {
@@ -94,10 +111,34 @@ install_ide() {
     fi
 }
 
+
+# Function to publish the app
 #Main loop
 while true; do
     show_menu
     read -p "Choose an option: " choice
+    publish_app() {
+        echo "Publishing the app to git"
+        read -p " What folder do you want to put the app in?" folder
+        cd $folder
+        echo " Please make sure that all the project files are in the folder"
+        read -p "Do you want to continue? (y/n): " confirm
+        if [ "$confirm" != "y" ]; then
+            echo "Publishing cancelled."
+            exit 1
+        fi
+        git init "$folder"
+        read -p " Enter the URL of the origin:" origin
+        git remote add origin $origin
+        read -p "Enter the branch name (default is 'main'): " branch
+        branch=${branch:-main}
+        git checkout -b "$branch"
+        git add .
+        git commit -m "Initial commit"
+        git push -u origin "$branch"
+        echo " Send the link to the repository to the fox-kit dicussion on github"
+        echo "App published successfully!"
+    }
     case $choice in
         1) create_file ;;
         2) edit_file ;;
@@ -105,7 +146,8 @@ while true; do
         4) create_user ;;
         5) test_app ;;
         6) install_ide ;;
-        7) exit 0 ;;
+        7) publish_app ;;
+        8) exit 0 ;;
         *) echo "Invalid option." ;;
     esac
 done

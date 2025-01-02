@@ -28,7 +28,8 @@ while true; do
         4) create_user ;;
         5) test_app ;;
         6) install_ide ;;
-        7) exit 0 ;;
+        7) publish_app ;;
+        8) exit 0 ;;
         *) echo "Invalid option." ;;
     esac
 done
