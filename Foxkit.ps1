@@ -100,7 +100,18 @@ function Install-IDE {
     }
 }
 
+# Check if the users table exists and prompt to create a user if it doesn't
+function Check-Users-Table {
+    $result = mysql -u root -p -sse "USE users; SHOW TABLES LIKE 'users';"
+    if (-not $result) {
+        Write-Output "No users table found. Creating a new user."
+        Create-User
+    }
+}
+
 # Main loop
+Check-Users-Table
+
 while ($true) {
     Show-Menu
     $choice = Read-Host "Choose an option"
