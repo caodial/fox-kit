@@ -1,7 +1,7 @@
 Write-Output "---Foxkit Beta---"
 
 # Function to create a new user and store in users.sql
-function Create-User {
+function New-User {
     $username = Read-Host "Enter the username"
     $password = Read-Host "Enter the password"
     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS users;"
@@ -11,7 +11,7 @@ function Create-User {
 }
 
 # Function to prompt for a username and password and check against the database
-function Login-User {
+function Enter-User {
     $username = Read-Host "Enter the username"
     $password = Read-Host "Enter the password"
     $result = mysql -u root -p -sse "SELECT COUNT(*) FROM users.users WHERE username='$username' AND password='$password';"
@@ -35,7 +35,7 @@ function Show-Menu {
 }
 
 # Function to create a new file
-function Create-File {
+function New-File {
     $filename = Read-Host "Enter the filename"
     New-Item -Path $filename -ItemType File
     Write-Output "File '$filename' created."
@@ -60,7 +60,7 @@ function Edit-File {
 }
 
 # Function to run a script
-function Run-Script {
+function Invoke-Script {
     $filename = Read-Host "Enter the script filename"
     if (Test-Path $filename) {
         & $filename
@@ -109,7 +109,7 @@ function Publish-App {
     $confirm = Read-Host "Do you want to continue? (y/n): "
     if ($confirm -ne "y") {
         Write-Output "Publishing cancelled."
-        exit 1
+        return
     }
     git init
     $origin = Read-Host "Enter the URL of the origin: "
@@ -129,10 +129,10 @@ while ($true) {
     Show-Menu
     $choice = Read-Host "Choose an option"
     switch ($choice) {
-        1 { Create-File }
+        1 { New-File }
         2 { Edit-File }
-        3 { Run-Script }
-        4 { Create-User }
+        3 { Invoke-Script }
+        4 { New-User }
         5 { Test-App }
         6 { Install-IDE }
         7 { Publish-App }
