@@ -3,7 +3,7 @@ Write-Output "---Foxkit Beta---"
 # Function to create a new user and store in users.sql
 function Create-User {
     $username = Read-Host "Enter the username"
-    $password = Read-Host "Enter the password" -AsSecureString | ConvertFrom-SecureString
+    $password = Read-Host "Enter the password"
     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS users;"
     mysql -u root -p -e "USE users; CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50), password VARCHAR(50));"
     mysql -u root -p -e "USE users; INSERT INTO users (username, password) VALUES ('$username', '$password');"
@@ -13,7 +13,7 @@ function Create-User {
 # Function to prompt for a username and password and check against the database
 function Login-User {
     $username = Read-Host "Enter the username"
-    $password = Read-Host "Enter the password" -AsSecureString | ConvertFrom-SecureString
+    $password = Read-Host "Enter the password"
     $result = mysql -u root -p -sse "SELECT COUNT(*) FROM users.users WHERE username='$username' AND password='$password';"
     if ($result -eq 1) {
         Write-Output "Login successful."
@@ -98,6 +98,30 @@ function Install-IDE {
         Write-Output "Installing Visual Studio Code..."
         winget install --id Microsoft.VisualStudioCode -e
     }
+}
+
+# Function to publish the app
+function Publish-App {
+    Write-Output "Publishing the app to git"
+    $folder = Read-Host "What folder do you want to put the app in?"
+    Set-Location $folder
+    Write-Output "Please make sure that all the project files are in the folder"
+    $confirm = Read-Host "Do you want to continue? (y/n): "
+    if ($confirm -ne "y") {
+        Write-Output "Publishing cancelled."
+        exit 1
+    }
+    git init
+    $origin = Read-Host "Enter the URL of the origin: "
+    git remote add origin $origin
+    $branch = Read-Host "Enter the branch name (default is 'main'): "
+    if (-not $branch) { $branch = "main" }
+    git checkout -b $branch
+    git add .
+    git commit -m "Initial commit"
+    git push -u origin $branch
+    Write-Output "Send the link to the repository to the fox-kit discussion on GitHub"
+    Write-Output "App published successfully!"
 }
 
 # Main loop
