@@ -73,7 +73,6 @@ run_script() {
     fi
 }
 
-
 # Function to test the app
 test_app() {
     read -p "Enter the script filename to test: " filename
@@ -95,50 +94,69 @@ test_app() {
     fi
 }
 
-
-# Function to install an IDE (Visual Studio Code)
+# Function to install an IDE
 install_ide() {
-    if command -v code &> /dev/null; then
-        echo "Visual Studio Code is already installed."
-    else
-        echo "Installing Visual Studio Code..."
-        sudo apt update
-        sudo apt install -y software-properties-common apt-transport-https wget
-        wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
-        sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
-        sudo apt update
-        sudo apt install -y code
-    fi
+    echo "What IDE do you want to install?"
+    echo "1) Visual Studio Code"
+    echo "2) IntelliJ IDEA"
+    read -p "Choose an option: " ide_choice
+
+    case $ide_choice in
+        1)
+            if command -v code &> /dev/null; then
+                echo "Visual Studio Code is already installed."
+            else
+                echo "Installing Visual Studio Code..."
+                sudo apt update
+                sudo apt install -y software-properties-common apt-transport-https wget
+                wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
+                sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
+                sudo apt update
+                sudo apt install -y code
+            fi
+            ;;
+        2)
+            if command -v idea &> /dev/null; then
+                echo "IntelliJ IDEA is already installed."
+            else
+                echo "Installing IntelliJ IDEA..."
+                sudo snap install intellij-idea-community --classic
+            fi
+            ;;
+        *)
+            echo "Invalid option."
+            ;;
+    esac
 }
 
-
 # Function to publish the app
-#Main loop
+publish_app() {
+    echo "Publishing the app to git"
+    read -p "What folder do you want to put the app in? " folder
+    cd "$folder"
+    echo "Please make sure that all the project files are in the folder"
+    read -p "Do you want to continue? (y/n): " confirm
+    if [ "$confirm" != "y" ]; then
+        echo "Publishing cancelled."
+        exit 1
+    fi
+    git init "$folder"
+    read -p "Enter the URL of the origin: " origin
+    git remote add origin "$origin"
+    read -p "Enter the branch name (default is 'main'): " branch
+    branch=${branch:-main}
+    git checkout -b "$branch"
+    git add .
+    git commit -m "Initial commit"
+    git push -u origin "$branch"
+    echo "Send the link to the repository to the fox-kit discussion on GitHub"
+    echo "App published successfully!"
+}
+
+# Main loop
 while true; do
     show_menu
     read -p "Choose an option: " choice
-    publish_app() {
-        echo "Publishing the app to git"
-        read -p " What folder do you want to put the app in?" folder
-        cd $folder
-        echo " Please make sure that all the project files are in the folder"
-        read -p "Do you want to continue? (y/n): " confirm
-        if [ "$confirm" != "y" ]; then
-            echo "Publishing cancelled."
-            exit 1
-        fi
-        git init "$folder"
-        read -p " Enter the URL of the origin:" origin
-        git remote add origin $origin
-        read -p "Enter the branch name (default is 'main'): " branch
-        branch=${branch:-main}
-        git checkout -b "$branch"
-        git add .
-        git commit -m "Initial commit"
-        git push -u origin "$branch"
-        echo " Send the link to the repository to the fox-kit dicussion on github"
-        echo "App published successfully!"
-    }
     case $choice in
         1) create_file ;;
         2) edit_file ;;

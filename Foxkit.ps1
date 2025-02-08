@@ -1,20 +1,24 @@
 Write-Output "---Foxkit Beta---"
 
 # Function to create a new user and store in users.sql
-function Create-User {
+function New-User {
     $username = Read-Host "Enter the username"
     $password = Read-Host "Enter the password"
-    mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS users;"
-    mysql -u root -p -e "USE users; CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50), password VARCHAR(50));"
-    mysql -u root -p -e "USE users; INSERT INTO users (username, password) VALUES ('$username', '$password');"
+    $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential("root", $securePassword)
+    mysql -u root -p$($credential.GetNetworkCredential().Password) -e "CREATE DATABASE IF NOT EXISTS users;"
+    mysql -u root -p$($credential.GetNetworkCredential().Password) -e "USE users; CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50), password VARCHAR(50));"
+    mysql -u root -p$($credential.GetNetworkCredential().Password) -e "USE users; INSERT INTO users (username, password) VALUES ('$username', '$password');"
     Write-Output "User '$username' created and stored in MySQL."
 }
 
 # Function to prompt for a username and password and check against the database
-function Login-User {
+function Enter-User {
     $username = Read-Host "Enter the username"
     $password = Read-Host "Enter the password"
-    $result = mysql -u root -p -sse "SELECT COUNT(*) FROM users.users WHERE username='$username' AND password='$password';"
+    $securePassword = ConvertTo-SecureString $password -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential("root", $securePassword)
+    $result = mysql -u root -p$($credential.GetNetworkCredential().Password) -sse "SELECT COUNT(*) FROM users.users WHERE username='$username' AND password='$password';"
     if ($result -eq 1) {
         Write-Output "Login successful."
     } else {
@@ -35,7 +39,7 @@ function Show-Menu {
 }
 
 # Function to create a new file
-function Create-File {
+function New-File {
     $filename = Read-Host "Enter the filename"
     New-Item -Path $filename -ItemType File
     Write-Output "File '$filename' created."
@@ -60,7 +64,7 @@ function Edit-File {
 }
 
 # Function to run a script
-function Run-Script {
+function Invoke-Script {
     $filename = Read-Host "Enter the script filename"
     if (Test-Path $filename) {
         & $filename
@@ -124,19 +128,32 @@ function Publish-App {
     Write-Output "App published successfully!"
 }
 
+# Check if the users table exists and prompt to create a user if it doesn't
+function Test-Users-Table {
+    $securePassword = ConvertTo-SecureString (Read-Host "Enter MySQL root password" -AsSecureString) -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential("root", $securePassword)
+    $result = mysql -u root -p$($credential.GetNetworkCredential().Password) -sse "USE users; SHOW TABLES LIKE 'users';"
+    if (-not $result) {
+        Write-Output "No users table found. Creating a new user."
+        New-User
+    }
+}
+
 # Main loop
+Test-Users-Table
+
 while ($true) {
     Show-Menu
     $choice = Read-Host "Choose an option"
     switch ($choice) {
-        1 { Create-File }
+        1 { New-File }
         2 { Edit-File }
-        3 { Run-Script }
-        4 { Create-User }
+        3 { Invoke-Script }
+        4 { Enter-User }
         5 { Test-App }
         6 { Install-IDE }
         7 { Publish-App }
-        8 { exit }
+        8 { break }
         default { Write-Output "Invalid option." }
     }
 }
