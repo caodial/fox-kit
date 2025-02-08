@@ -1,7 +1,7 @@
 Write-Output "---Foxkit Beta---"
 
 # Function to create a new user and store in users.sql
-function New-User {
+function Create-User {
     $username = Read-Host "Enter the username"
     $password = Read-Host "Enter the password"
     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS users;"
@@ -11,7 +11,7 @@ function New-User {
 }
 
 # Function to prompt for a username and password and check against the database
-function Enter-User {
+function Login-User {
     $username = Read-Host "Enter the username"
     $password = Read-Host "Enter the password"
     $result = mysql -u root -p -sse "SELECT COUNT(*) FROM users.users WHERE username='$username' AND password='$password';"
@@ -35,7 +35,7 @@ function Show-Menu {
 }
 
 # Function to create a new file
-function New-File {
+function Create-File {
     $filename = Read-Host "Enter the filename"
     New-Item -Path $filename -ItemType File
     Write-Output "File '$filename' created."
@@ -60,7 +60,7 @@ function Edit-File {
 }
 
 # Function to run a script
-function Invoke-Script {
+function Run-Script {
     $filename = Read-Host "Enter the script filename"
     if (Test-Path $filename) {
         & $filename
@@ -129,10 +129,10 @@ while ($true) {
     Show-Menu
     $choice = Read-Host "Choose an option"
     switch ($choice) {
-        1 { New-File }
+        1 { Create-File }
         2 { Edit-File }
-        3 { Invoke-Script }
-        4 { New-User }
+        3 { Run-Script }
+        4 { Create-User }
         5 { Test-App }
         6 { Install-IDE }
         7 { Publish-App }
