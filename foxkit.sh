@@ -1,15 +1,22 @@
 #!/bin/bash
+if [ -n "$1" ]; then
+   ./foxkit_rescue.sh
+fi
 
 echo ---Foxkit Beta---
+
+DATABASE="foxkit_data"
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS $DATABASE;"
+mysql -u root -p -e "USE $DATABASE; CREATE TABLE IF NOT EXISTS project_data (id INT AUTO_INCREMENT PRIMARY KEY, project_name TEXT, project_id TEXT);"
 
 # Function to create a new user and store in users.sql
 create_user() {
     read -p "Enter the username: " username
     read -sp "Enter the password: " password
     echo
-    mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS users;"
-    mysql -u root -p -e "USE users; CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50), password VARCHAR(50));"
-    mysql -u root -p -e "USE users; INSERT INTO users (username, password) VALUES ('$username', '$password');"
+    mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS users_foxkit;"
+    mysql -u root -p -e "USE users_foxkit; CREATE TABLE IF NOT EXISTS users (id INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50), password VARCHAR(50));"
+    mysql -u root -p -e "USE users_foxkit; INSERT INTO users (username, password) VALUES ('$username', '$password');"
     echo "User '$username' created and stored in MySQL."
 }
 
@@ -18,24 +25,12 @@ login_user() {
     read -p "Enter the username: " username
     read -sp "Enter the password: " password
     echo
-    result=$(mysql -u root -p -sse "SELECT COUNT(*) FROM users.users WHERE username='$username' AND password='$password';")
+    result=$(mysql -u root -p -sse "SELECT COUNT(*) FROM users_foxkit.users WHERE username='$username' AND password='$password';")
     if [ "$result" -eq 1 ]; then
         echo "Login successful."
     else
         echo "Invalid username or password."
     fi
-}
-
-# Function to show the menu
-show_menu() {
-    echo "1) Create a new file"
-    echo "2) Edit an existing file"
-    echo "3) Run a script"
-    echo "4) Create a new user"
-    echo "5) Test the app"
-    echo "6) Install an IDE"
-    echo "7) Publish the app"
-    echo "8) Exit"
 }
 
 # Function to create a new file
@@ -84,10 +79,6 @@ test_app() {
         else
             echo "Errors found:"
             echo "$errors"
-            echo "For more information on resolving errors, you can visit the following links:"
-            echo "1. Bash Scripting Errors: https://www.shellscript.sh/errors.html"
-            echo "2. Common Bash Errors: https://tldp.org/LDP/abs/html/exitcodes.html"
-            echo "3. Stack Overflow: https://stackoverflow.com/questions/tagged/bash"
         fi
     else
         echo "Script '$filename' does not exist."
@@ -107,10 +98,6 @@ install_ide() {
                 echo "Visual Studio Code is already installed."
             else
                 echo "Installing Visual Studio Code..."
-                sudo apt update
-                sudo apt install -y software-properties-common apt-transport-https wget
-                wget -q https://packages.microsoft.com/keys/microsoft.asc -O- | sudo apt-key add -
-                sudo add-apt-repository "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main"
                 sudo apt update
                 sudo apt install -y code
             fi
@@ -138,9 +125,9 @@ publish_app() {
     read -p "Do you want to continue? (y/n): " confirm
     if [ "$confirm" != "y" ]; then
         echo "Publishing cancelled."
-        exit 1
+        return
     fi
-    git init "$folder"
+    git init
     read -p "Enter the URL of the origin: " origin
     git remote add origin "$origin"
     read -p "Enter the branch name (default is 'main'): " branch
@@ -149,8 +136,35 @@ publish_app() {
     git add .
     git commit -m "Initial commit"
     git push -u origin "$branch"
-    echo "Send the link to the repository to the fox-kit discussion on GitHub"
     echo "App published successfully!"
+}
+
+# Function to back up the MySQL database
+backup_mysql() {
+    read -p "Enter the backup filename: " filename
+    mysqldump -u root -p "$DATABASE" > "$filename"
+    echo "Backup of database '$DATABASE' created in '$filename'."
+}
+
+# Function to restore the MySQL database
+restore_mysql() {
+    read -p "Enter the backup filename to restore: " filename
+    mysql -u root -p "$DATABASE" < "$filename"
+    echo "Database '$DATABASE' restored from '$filename'."
+}
+
+# Function to show the menu
+show_menu() {
+    echo "1) Create a file"
+    echo "2) Edit a file"
+    echo "3) Run a script"
+    echo "4) Create a user"
+    echo "5) Test the app"
+    echo "6) Install an IDE"
+    echo "7) Publish the app"
+    echo "8) Backup MySQL"
+    echo "9) Restore MySQL"
+    echo "0) Exit"
 }
 
 # Main loop
@@ -165,7 +179,9 @@ while true; do
         5) test_app ;;
         6) install_ide ;;
         7) publish_app ;;
-        8) exit 0 ;;
+        8) backup_mysql ;;
+        9) restore_mysql ;;
+        0) exit 0 ;;
         *) echo "Invalid option." ;;
     esac
 done

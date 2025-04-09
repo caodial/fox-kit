@@ -2,8 +2,20 @@
 
 source ./foxkit.sh
 
-install_cmd="nix-env -i"
-update_cmd="nix-channel --update && nix-env -u '*'"
+install_cmd="sudo rpm -i"
+update_cmd="sudo dnf update -y"
+
+install_ide() {
+    if command -v code &> /dev/null; then
+        echo "Visual Studio Code is already installed."
+    else
+        echo "Installing Visual Studio Code..."
+        sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+        sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/yum.repos.d/vscode.repo'
+        sudo dnf check-update
+        sudo dnf install -y code
+    fi
+}
 
 # Main loop
 while true; do
@@ -17,7 +29,9 @@ while true; do
         5) test_app ;;
         6) install_ide ;;
         7) publish_app ;;
-        8) exit 0 ;;
+        8) backup_mysql ;;
+        9) restore_mysql ;;
+        0) exit 0 ;;
         *) echo "Invalid option." ;;
     esac
 done

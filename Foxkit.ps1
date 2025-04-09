@@ -35,7 +35,9 @@ function Show-Menu {
     Write-Output "5) Test the app"
     Write-Output "6) Install an IDE"
     Write-Output "7) Publish the app"
-    Write-Output "8) Exit"
+    Write-Output "8) Backup MySQL database"
+    Write-Output "9) Restore MySQL database"
+    Write-Output "0) Exit"
 }
 
 # Function to create a new file
@@ -49,15 +51,7 @@ function New-File {
 function Edit-File {
     $filename = Read-Host "Enter the filename"
     if (Test-Path $filename) {
-        if (Get-Command nano -ErrorAction SilentlyContinue) {
-            nano $filename
-        } elseif (Get-Command vi -ErrorAction SilentlyContinue) {
-            vi $filename
-        } elseif (Get-Command emacs -ErrorAction SilentlyContinue) {
-            emacs $filename
-        } else {
-            Write-Output "No suitable text editor found. Please install nano, vi, or emacs."
-        }
+        notepad $filename
     } else {
         Write-Output "File '$filename' does not exist."
     }
@@ -128,20 +122,25 @@ function Publish-App {
     Write-Output "App published successfully!"
 }
 
-# Check if the users table exists and prompt to create a user if it doesn't
-function Test-Users-Table {
+# Function to backup MySQL database
+function Backup-MySQL {
+    $filename = Read-Host "Enter the backup filename"
     $securePassword = ConvertTo-SecureString (Read-Host "Enter MySQL root password" -AsSecureString) -AsPlainText -Force
     $credential = New-Object System.Management.Automation.PSCredential("root", $securePassword)
-    $result = mysql -u root -p$($credential.GetNetworkCredential().Password) -sse "USE users; SHOW TABLES LIKE 'users';"
-    if (-not $result) {
-        Write-Output "No users table found. Creating a new user."
-        New-User
-    }
+    mysqldump -u root -p$($credential.GetNetworkCredential().Password) foxkit_data > $filename
+    Write-Output "Backup of database 'foxkit_data' created in '$filename'."
+}
+
+# Function to restore MySQL database
+function Restore-MySQL {
+    $filename = Read-Host "Enter the backup filename to restore"
+    $securePassword = ConvertTo-SecureString (Read-Host "Enter MySQL root password" -AsSecureString) -AsPlainText -Force
+    $credential = New-Object System.Management.Automation.PSCredential("root", $securePassword)
+    Get-Content $filename | mysql -u root -p$($credential.GetNetworkCredential().Password) foxkit_data
+    Write-Output "Database 'foxkit_data' restored from '$filename'."
 }
 
 # Main loop
-Test-Users-Table
-
 while ($true) {
     Show-Menu
     $choice = Read-Host "Choose an option"
@@ -149,11 +148,13 @@ while ($true) {
         1 { New-File }
         2 { Edit-File }
         3 { Invoke-Script }
-        4 { Enter-User }
+        4 { New-User }
         5 { Test-App }
         6 { Install-IDE }
         7 { Publish-App }
-        8 { break }
+        8 { Backup-MySQL }
+        9 { Restore-MySQL }
+        0 { break }
         default { Write-Output "Invalid option." }
     }
 }

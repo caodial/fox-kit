@@ -11,7 +11,7 @@ install_ide() {
     else
         echo "Installing Visual Studio Code..."
         $update_cmd
-        $install_cmd--ask dev-util/visual-studio-code
+        $install_cmd --ask dev-util/visual-studio-code
     fi
 }
 
@@ -27,7 +27,9 @@ while true; do
         5) test_app ;;
         6) install_ide ;;
         7) publish_app ;;
-        8) exit 0 ;;
+        8) backup_mysql ;;
+        9) restore_mysql ;;
+        0) exit 0 ;;
         *) echo "Invalid option." ;;
     esac
 done

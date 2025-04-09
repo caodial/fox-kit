@@ -14,7 +14,7 @@ install_ide() {
         sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
         sudo sh -c 'echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" > /etc/zypp/repos.d/vscode.repo'
         sudo zypper refresh
-         $install_cmd code
+        $install_cmd code
     fi
 }
 
@@ -30,7 +30,9 @@ while true; do
         5) test_app ;;
         6) install_ide ;;
         7) publish_app ;;
-        8) exit 0 ;;
+        8) backup_mysql ;;
+        9) restore_mysql ;;
+        0) exit 0 ;;
         *) echo "Invalid option." ;;
     esac
 done

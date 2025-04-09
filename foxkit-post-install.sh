@@ -48,9 +48,16 @@ esac
 # Update package information
 $update_cmd
 read -p " What text editor do you want to use?" text_editor
+read -p "Do you want to enable YubiKey integration? (y/n): " enable_yubikey
+if [[ "$enable_yubikey" == "y" || "$enable_yubikey" == "Y" ]]; then
+    $install_cmd gnupg2 scdaemon yubikey-manager
+    echo "YubiKey integration tools installed."
+fi
 # Install MySQL server and the text editor of your choice
 $install_cmd mysql-server
 $install_cmd $text_editor
+$install_cmd cryptsetup
+
 
 # Start MySQL services
 sudo systemctl start mysql
