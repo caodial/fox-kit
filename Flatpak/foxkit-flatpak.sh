@@ -1,17 +1,63 @@
 #!/bin/bash
+# Set strict mode to catch errors
+set -euo pipefail
+
+# Check if script is run with proper permissions
+if [ "$(id -u)" -eq 0 ]; then
+    echo "Warning: This script should not be run as root for security reasons."
+    echo "Please run as a regular user with sudo privileges."
+    exit 1
+fi
 
 source ./foxkit.sh
 
-install_cmd="sudo flatpak install -y"
-update_cmd="sudo flatpak update -y"
+# Define package manager commands as arrays for security
+install_cmd=("sudo" "flatpak" "install" "-y")
+update_cmd=("sudo" "flatpak" "update" "-y")
+
+# Function to safely execute system commands
+safe_execute() {
+    echo "Executing: $*"
+    if ! "$@"; then
+        echo "Error: Command failed: $*"
+        return 1
+    fi
+}
 
 install_ide() {
     if command -v code &> /dev/null; then
         echo "Visual Studio Code is already installed."
     else
         echo "Installing Visual Studio Code..."
-        $update_cmd
-        $install_cmd flathub com.visualstudio.code -y
+
+        # Check if user has sudo privileges
+        if ! sudo -n true 2>/dev/null; then
+            echo "This operation requires sudo privileges."
+            echo "Please run the following commands manually:"
+            echo "sudo flatpak update -y"
+            echo "sudo flatpak install -y flathub com.visualstudio.code"
+            return 1
+        fi
+
+        # Update flatpak
+        safe_execute "${update_cmd[@]}"
+
+        # Validate repository and package name
+        REPO="flathub"
+        PACKAGE="com.visualstudio.code"
+
+        if ! [[ "$REPO" =~ ^[a-zA-Z0-9_\.-]+$ ]]; then
+            echo "Error: Invalid repository name."
+            return 1
+        fi
+
+        if ! [[ "$PACKAGE" =~ ^[a-zA-Z0-9_\.-]+$ ]]; then
+            echo "Error: Invalid package name."
+            return 1
+        fi
+
+        # Install VS Code
+        safe_execute "${install_cmd[@]}" "$REPO" "$PACKAGE"
     fi
 }
 

@@ -102,6 +102,26 @@ This document outlines the security improvements made to the Foxkit project to a
    - Implemented proper access rule protection
    - Added validation for file and directory operations
 
+## Package Manager Script Security Improvements
+
+1. **Package Manager Command Security**
+   - Replaced string-based command variables with arrays to prevent command injection
+   - Added validation for package names and repository URLs
+   - Implemented secure command execution with proper error handling
+   - Added privilege checks to prevent running as root
+
+2. **Repository Management Security**
+   - Used secure temporary files for repository configuration
+   - Added validation for GPG key URLs
+   - Implemented secure handling of repository files
+   - Set appropriate file permissions for repository files
+
+3. **Package Installation Security**
+   - Added sudo privilege checks before attempting installations
+   - Implemented proper error handling for installation operations
+   - Used safe execution functions to prevent command injection
+   - Added validation for all package names and options
+
 ## Installation Security Improvements
 
 1. **Package Manager Security**
