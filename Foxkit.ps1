@@ -1,3 +1,19 @@
+# How to push all files in Foxkit to your GitHub repo:
+# 1. Open PowerShell and navigate to your Foxkit folder:
+#    cd "$env:USERPROFILE\Foxkit"
+# 2. Initialize git (if not already done):
+#    git init
+# 3. Add all files:
+#    git add .
+# 4. Commit your changes:
+#    git commit -m "Initial commit"
+# 5. Add your GitHub repository as the remote:
+#    git remote add origin https://github.com/yourusername/yourrepo.git
+# 6. Push to GitHub:
+#    git push -u origin main
+# Replace 'yourusername/yourrepo.git' with your actual GitHub repo URL.
+# If your branch is not 'main', use the correct branch name in the last command.
+
 # Set strict mode to catch errors
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
@@ -68,12 +84,34 @@ $db_pass = $credential.Password
 function Invoke-MySqlQuery {
     param (
         [Parameter(Mandatory=$true)]
-        [string]$Query
+        [string]$Query,
+        [Parameter(Mandatory=$false)]
+        [System.Collections.Hashtable]$Parameters = @{}
     )
 
-    $plainPassword = $credential.GetNetworkCredential().Password
-    $result = mysql -u $db_user -p"$plainPassword" -e $Query
-    return $result
+    try {
+        $connection = New-Object MySql.Data.MySqlClient.MySqlConnection
+        $connection.ConnectionString = "Server=localhost;Database=$DATABASE;User Id=$db_user;Password=$($credential.GetNetworkCredential().Password);SSL Mode=Required;"
+        $connection.Open()
+
+        $command = New-Object MySql.Data.MySqlClient.MySqlCommand($Query, $connection)
+        
+        foreach ($param in $Parameters.GetEnumerator()) {
+            $command.Parameters.AddWithValue($param.Key, $param.Value) | Out-Null
+        }
+
+        $result = $command.ExecuteScalar()
+        return $result
+    }
+    catch {
+        Write-Error "Database error: $($_.Exception.Message)"
+        throw
+    }
+    finally {
+        if ($connection -and $connection.State -eq 'Open') {
+            $connection.Close()
+        }
+    }
 }
 
 # Initialize database
@@ -106,10 +144,16 @@ function New-User {
         return
     }
 
-    # Hash the password using SHA-256 (in production, use a more secure method)
-    $hasher = [System.Security.Cryptography.SHA256]::Create()
-    $hashBytes = $hasher.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($plainPassword))
-    $hashedPassword = [System.BitConverter]::ToString($hashBytes).Replace("-", "").ToLower()
+    # Hash the password using PBKDF2 with a high iteration count
+    $salt = New-Object byte[](32)
+    $rng = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
+    $rng.GetBytes($salt)
+    
+    $pbkdf2 = New-Object System.Security.Cryptography.Rfc2898DeriveBytes($plainPassword, $salt, 310000)
+    $hashBytes = $pbkdf2.GetBytes(32)
+    $saltString = [Convert]::ToBase64String($salt)
+    $hashString = [Convert]::ToBase64String($hashBytes)
+    $hashedPassword = "$saltString`$310000`$$hashString"
 
     # Clear the plaintext password from memory
     $plainPassword = $null
