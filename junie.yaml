@@ -28,8 +28,8 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Run Junie
+      - name: Official Junie GitHub Action
         id: junie
-        uses: JetBrains/junie-github-action@v0
+        uses: JetBrains/junie-github-action@v1.3.7
         with:
-          junie_api_key: ${{ secrets.JUNIE_API_KEY }} # Change to the vendor key in case of BYOK, e.g. `anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}`
+          junie_api_key: ${{ secrets.JUNIE_API_KEY }}
